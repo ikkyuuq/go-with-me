@@ -1,6 +1,8 @@
 package main
 
-import { "fmt", "go-with-me/pkg/hello"}
+import (
+	"fmt"
+)
 
 func main() {
 	fmt.Println(Hello())
