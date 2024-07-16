@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+
+	h "github.com/ikkyuuq/go-with-me/pkg/hello"
 )
 
 func main() {
-	fmt.Println(Hello())
+	fmt.Println(h.Hello())
 }
