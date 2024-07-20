@@ -39,10 +39,20 @@ func (ts *TaskServer) getAllTaskHandler(w http.ResponseWriter, req *http.Request
 }
 
 func (ts *TaskServer) getTaskHandler(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	idStr := vars["id"]
+	if idStr == "" {
+		http.Error(w, "ID not found in path", http.StatusBadRequest)
+		return
+	}
+
 	log.Printf("handling get task at %s\n", req.URL.Path)
 
-	id, _ := strconv.Atoi(mux.Vars(req)["id"])
-	log.Printf("%d", id)
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	task, err := ts.store.GetTask(id)
 	if err != nil {
@@ -66,7 +76,7 @@ func main() {
 	server := NewTaskServer()
 
 	router.HandleFunc("/tasks/", server.getAllTaskHandler).Methods("GET")
-	router.HandleFunc("/task/{id: [0-9]+}", server.getTaskHandler).Methods("GET")
+	router.HandleFunc("/task/{id:[0-9]+}", server.getTaskHandler).Methods("GET")
 
 	log.Println("Server is running!!!")
 	log.Fatal(http.ListenAndServe(":8080", router))
