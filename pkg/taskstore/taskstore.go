@@ -1,6 +1,9 @@
 package taskstore
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type TaskStruct struct {
 	Due     time.Time `json:"due"`
@@ -41,7 +44,14 @@ func NewTaskStore() *TaskStore {
 func (ts *TaskStore) CreateTask(text string, tags []string, due time.Time) int { return 0 }
 
 // GetTask retrieves a task from the store, by id. If no such id exists, an error is returned.
-func (ts *TaskStore) GetTask(id int) (Task, error) { return nil, nil }
+func (ts *TaskStore) GetTask(id int) (Task, error) {
+	for _, task := range ts.Tasks {
+		if id == task.Id {
+			return task, nil
+		}
+	}
+	return nil, errors.New("not found task")
+}
 
 // DeleteTask deletes the task with the given id. If no such id exists, an error
 // is returned.
