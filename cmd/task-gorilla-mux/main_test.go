@@ -17,7 +17,7 @@ func assert(t testing.TB, got, want int) {
 func TestHandler(t *testing.T) {
 	server := NewTaskServer()
 	t.Run("getAllTaskHandler", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/tasks/", nil)
+		req, _ := http.NewRequest("GET", "/task/", nil)
 
 		res := httptest.NewRecorder()
 		handler := http.HandlerFunc(server.getAllTaskHandler)

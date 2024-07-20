@@ -75,7 +75,7 @@ func main() {
 	router.StrictSlash(true)
 	server := NewTaskServer()
 
-	router.HandleFunc("/tasks/", server.getAllTaskHandler).Methods("GET")
+	router.HandleFunc("/task/", server.getAllTaskHandler).Methods("GET")
 	router.HandleFunc("/task/{id:[0-9]+}", server.getTaskHandler).Methods("GET")
 
 	log.Println("Server is running!!!")
