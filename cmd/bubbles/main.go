@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -12,6 +13,8 @@ type model struct {
 	editor   []string
 	cursor   int
 	selected map[int]struct{}
+	help     help.Model
+	keys     KeyMap
 }
 
 type KeyMap struct {
@@ -19,25 +22,38 @@ type KeyMap struct {
 	Down  key.Binding
 	Enter key.Binding
 	Quit  key.Binding
+	Help  key.Binding
 }
 
 var DefaultKeyMap = KeyMap{
 	Up: key.NewBinding(
 		key.WithKeys("k", "up"),
-		key.WithHelp("↑/k and become nvimer", "move up"),
+		key.WithHelp("↑/k", "move up and become master of vim motion"),
 	),
 	Down: key.NewBinding(
 		key.WithKeys("j", "down"),
-		key.WithHelp("↓/j and become nvimer", "move down"),
+		key.WithHelp("↓/j", "move down and become master of vim motion"),
 	),
 	Enter: key.NewBinding(
 		key.WithKeys("enter", " "),
-		key.WithHelp("Enter", "Space"),
+		key.WithHelp("return/space", "select"),
 	),
 	Quit: key.NewBinding(
 		key.WithKeys("ctrl+c", "q"),
-		key.WithHelp("Ctrl+c", "press q"),
+		key.WithHelp("q", "quit"),
 	),
+	Help: key.NewBinding(
+		key.WithKeys("?"),
+		key.WithHelp("?", "toggle help"),
+	),
+}
+
+func (k KeyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Help, k.Quit}
+}
+
+func (k KeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{{k.Up, k.Down, k.Enter}, {k.Help, k.Quit}}
 }
 
 func (m *model) New() *model {
@@ -46,8 +62,10 @@ func (m *model) New() *model {
 
 func initialModel() model {
 	return model{
+		keys:     DefaultKeyMap,
 		editor:   []string{"NVIM IS GOD", "VSTR**H", "JetBrainDead", "List4", "List5", "List6", "List7", "List8", "List9", "List10"},
 		selected: make(map[int]struct{}),
+		help:     help.New(),
 	}
 }
 
@@ -75,13 +93,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				m.selected[m.cursor] = struct{}{}
 			}
+		case key.Matches(msg, DefaultKeyMap.Help):
+			m.help.ShowAll = !m.help.ShowAll
 		}
 	}
 	return m, nil
 }
 
 func (m model) View() string {
-	s := "What Text Editor do you use?\n\n"
+	s := "Which text editor do you use?\n\n"
 
 	for i, list := range m.editor {
 		cursor := " "
@@ -96,7 +116,9 @@ func (m model) View() string {
 
 		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, list)
 	}
-	return s
+
+	helpView := m.help.View(m.keys)
+	return s + helpView
 }
 
 func main() {
