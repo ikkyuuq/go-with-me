@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type TaskStruct struct {
+type Task struct {
 	Due     time.Time `json:"due"`
 	Content string    `json:"string"`
 	Tags    []string  `json:"tags"`
@@ -17,8 +17,7 @@ type TaskStore struct {
 }
 
 type (
-	Tasks *[]Task
-	Task  *TaskStruct
+	Tasks []Task
 )
 
 func NewTaskStore() *TaskStore {
@@ -41,7 +40,17 @@ func NewTaskStore() *TaskStore {
 }
 
 // CreateTask creates a new task in the store.
-func (ts *TaskStore) CreateTask(text string, tags []string, due time.Time) int { return 0 }
+func (ts *TaskStore) CreateTask(text string, tags []string, due time.Time) int {
+	id := len(ts.Tasks) + 1
+	task := Task{
+		Due:     due,
+		Content: text,
+		Tags:    tags,
+		Id:      id,
+	}
+	ts.Tasks = append(ts.Tasks, task)
+	return id
+}
 
 // GetTask retrieves a task from the store, by id. If no such id exists, an error is returned.
 func (ts *TaskStore) GetTask(id int) (Task, error) {
@@ -50,7 +59,7 @@ func (ts *TaskStore) GetTask(id int) (Task, error) {
 			return task, nil
 		}
 	}
-	return nil, errors.New("not found task")
+	return Task{}, errors.New("not found task")
 }
 
 // DeleteTask deletes the task with the given id. If no such id exists, an error
